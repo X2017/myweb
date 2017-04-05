@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    	<layout class="ch.qos.logback.classic.PatternLayout">
+			<pattern>%d{HH:mm:ss.SSS}[%thread]%-5level %logger{36} - %msg%n</pattern>
+		</layout>
+	</appender>
+
+	<logger name="com.nk.dao" level="DEBUG"/>
+	
+	<logger name="org.springframework.web.servlet.handler" additivity="false">
+	    <level value="WARN"/>
+	    <appender-ref ref="STDOUT"/>
+	</logger>
+	<logger name="org.springframework.web.servlet.mvc.method.annotation" additivity="false">
+	    <level value="WARN"/>
+	    <appender-ref ref="STDOUT"/>
+	</logger>
+	
+	<logger name="org.springframework.web.servlet.DispatcherServlet" level="WARN" additivity="false"/>
+	<logger name="org.springframework.web.servlet.mvc" level="WARN" additivity="false"/>
+	<logger name="org.springframework.jndi" level="WARN" additivity="false"/>
+	<logger name="org.apache.mina" level="WARN" additivity="false"/>
+	<logger name="org.apache.commons.beanutils.converters" level="WARN" additivity="false"/>
+	<logger name="org.springframework.web.context.support" level="WARN" additivity="false"/>
+	
+	<logger name="org.springframework" level="WARN" additivity="false"/>
+	<logger name="org.apache" level="WARN" additivity="false"/>
+	<logger name="com.mchange" level="WARN" additivity="false"/>
+	<logger name="org.mybatis" level="WARN" additivity="false"/>
+	
+	<root level="DEBUG">
+		<appender-ref ref="STDOUT"/>
+	</root>
+</configuration>
+
+
+
+

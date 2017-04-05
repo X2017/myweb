@@ -1,0 +1,17 @@
+@charset "utf-8";
+ .input,#tool .input{padding:0 5px;border:1px solid #95B8E7;border-radius:5px;height:22px;margin:0;}
+#add_edit_form{display:none;opacity:0;filter:alpha(opacity=0);padding:30px 15px 0 30px;font-size:15px;overflow: hidden;}.add_edit_form_left{float:left}
+.add_edit_form_right{float:right;}
+#add_edit_form div{margin:0 10px 0 0;}
+ .add_edit_form_left div>label, .add_edit_form_right div>label{display:block;float:left;height:100%;line-height:35px;}
+.add_edit_form_left div>label{width:120px;}
+.add_edit_form_right label{width:100px;}
+#add_edit_form div:after{content:".";height:0;visibility:hidden;display:block;clear:both;}
+.input{width:200px;height:25px;font-size:15px;}
+#add_edit_form .input {float:left;}
+.dialog-button{padding-right:35px;}
+#tool .datebox{position:relative;left:5px;}
+#tool .input_search label{display:inline-block;margin-left:10px;}
+#tool .input_search input{margin-left:5px;}
+.datagrid-cell{text-align:center;}
+.read{color:red;font-size:13px;}

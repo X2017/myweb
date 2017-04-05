@@ -1,0 +1,944 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nk.dao.ArchiveMapper">
+
+	<select id="test" resultType="int">
+		select count(*) from
+		if_DR_LD_HOUR_201610
+	</select>
+	<select id="autoDef" resultType="com.nk.pojo.DI_DEF">
+		select
+		t.di_item_no,t.di_no,t.di_name,t.di_item_name
+		from if_di_def t where t.di_no
+		in (select distinct di_no from if_di_def)
+		order by
+		t.di_no,convert(t.di_item_name using gbk)
+	</select>
+	<select id="getAllInfMp" resultType="com.nk.pojo.INF_MP">
+		select mp_id,mp_name,mp_type
+		FROM if_inf_mp
+	</select>
+	<select id="getAllMps" resultType="com.nk.pojo.INF_MP">
+		select * FROM if_inf_mp
+	</select>
+
+	<select id="getAllTemplateId" resultType="String">
+		select task_template_ID
+		FROM if_task_template
+	</select>
+	<select id="getAllTerminal" resultType="com.nk.pojo.INF_TERM">
+		select
+		term_id,term_name,term_pro FROM if_inf_term order by convert(TERM_NAME
+		using gbk)
+	</select>
+	<select id="getAllTerms" resultType="com.nk.pojo.INF_TERM">
+		select * FROM if_inf_term
+	</select>
+	<select id="getTaskTemplateById" resultType="com.nk.pojo.TASK_TEMPLATE">
+		select * from
+		if_task_template WHERE task_template_id = #{id}
+	</select>
+
+	<!--判断是否存在 -->
+	<select id="existInfMp" resultType="int">
+		select count(mp_id) FROM if_inf_mp where mp_id = #{mp_id}
+	</select>
+	<select id="existInfTerm" resultType="int">
+		SELECT COUNT(term_id) FROM
+		if_inf_term WHERE term_id = #{term_id};
+	</select>
+
+	<select id="queryFrontMachineByCode" resultType="int">
+		select
+		count(FRONT_CODE) FROM if_inf_front_machine WHERE FRONT_CODE= #{code}
+	</select>
+	<sql id="search_customer">
+		<where>
+			<if test="c_no!=null and c_no != ''">
+				CUSTOMER_NO like CONCAT("%",#{c_no},"%")
+			</if>
+			<if test="c_man!=null and c_man !=''">
+				AND CREATE_MAN like CONCAT("%",#{c_man},"%")
+			</if>
+			<if test="c_date!=null and c_date !=''">
+				AND DATE_FORMAT(CREATED_DATE, '%Y-%m-%d') = #{c_date}
+			</if>
+		</where>
+	</sql>
+	<select id="getCustomerTotal" parameterType="MAP" resultType="int">
+		select count(*) from if_inf_customer
+		<include refid="search_customer"></include>
+	</select>
+	<select id="getPageCustomer" parameterType="MAP"
+		resultType="com.nk.pojo.INF_CUSTOMER">
+		select * from if_inf_customer
+		<include refid="search_customer"></include>
+		<if test="sort != null and sort != ''">
+			order by #{sort} #{order}
+		</if>
+		limit #{start},#{end}
+	</select>
+	<insert id="addCustomer" parameterType="com.nk.pojo.INF_CUSTOMER">
+		insert into
+		if_inf_customer(customer_no,customer_name,customer_type,industry_type,customer_capacity,customer_status,man,tel,emailAddr,address,is_valid,
+		create_man,created_date,area,power_org,remarks,customer_status_name,customer_type_name,industry_name,company_id,para_id)
+		values(#{customer_no},#{customer_name},#{customer_type},#{industry_type},#{customer_capacity},#{customer_status},#{man},#{tel},#{emailAddr},
+		#{address},#{is_valid},#{create_man},#{created_date},#{area},#{power_org},#{remarks},#{customer_status_name},#{customer_type_name},#{industry_name},
+		#{company_id},#{para_id})
+	</insert>
+	<update id="updateCustomer" parameterType="com.nk.pojo.INF_CUSTOMER">
+		update if_inf_customer set
+		customer_no=#{customer_no},customer_name=#{customer_name},customer_type=#{customer_type},industry_type=#{industry_type},
+		customer_capacity=#{customer_capacity},customer_status=#{customer_status},man=#{man},tel=#{tel},emailAddr=#{emailAddr},address=#{address},
+		is_valid=#{is_valid},create_man=#{create_man},created_date=#{created_date},area=#{area},power_org=#{power_org},remarks=#{remarks},
+		customer_status_name=#{customer_status_name},customer_type_name=#{customer_type_name},industry_name=#{industry_name},company_id=#{company_id},
+		para_id=#{para_id} where customer_id=#{customer_id}
+	</update>
+	<delete id="delCustomer">
+		delete from if_inf_customer where customer_id in
+		<foreach item="item" index="index" collection="delCustomerIdArray"
+			open="(" separator="," close=")">#{item}</foreach>
+	</delete>
+	<sql id="search_Terminal">
+		<where>
+			<if test="ip!=null and ip != ''">
+				IP like CONCAT("%",#{ip},"%")
+			</if>
+			<if test="create_man!=null and create_man !=''">
+				AND CREATE_MAN like CONCAT("%",#{create_man},"%")
+			</if>
+			<if test="create_date!=null and create_date !=''">
+				AND DATE_FORMAT(CREATE_DATE, '%Y-%m-%d') = #{create_date}
+			</if>
+			<if test="temp and temp !=''">
+				AND (TERM_ID like CONCAT("%",#{temp},"%") OR TERM_NAME like
+				CONCAT("%",#{temp},"%") )
+			</if>
+		</where>
+	</sql>
+	<select id="getTerminalTotal" parameterType="MAP" resultType="int">
+		select count(*) from if_inf_term
+		<include refid="search_Terminal"></include>
+	</select>
+	<select id="getPageTerminal" parameterType="MAP"
+		resultType="com.nk.pojo.INF_TERM">
+		select * from if_inf_term
+		<include refid="search_Terminal"></include>
+		<if test="sort != null and sort != ''">
+			order by #{sort} #{order}
+		</if>
+		limit #{start},#{end}
+	</select>
+	<select id="getTermByaddrAndCustId" resultType="com.nk.pojo.INF_TERM">
+		select * from if_inf_term WHERE term_addr = #{addr} AND customer_id=#{id}
+		order By term_id DESC
+	</select>
+	<insert id="addTerminal" parameterType="com.nk.pojo.INF_TERM">
+		insert into
+		if_inf_term(term_addr,term_name,phoneNo,simNo,ip,term_status,create_man,create_date,is_valid,term_asset_no,term_manufacturer,
+		phase,remarks,customer_id,term_pro,term_model)
+		values(#{term_addr},#{term_name},#{phoneNo},#{simNo},#{ip},#{term_status},#{create_man},#{create_date},#{is_valid},
+		#{term_asset_no},#{term_manufacturer},#{phase},#{remarks},#{customer_id},#{term_pro},#{term_model})
+	</insert>
+	<update id="updateTerminal" parameterType="com.nk.pojo.INF_TERM">
+		update if_inf_term set
+		term_addr=#{term_addr},term_name=#{term_name},phoneNo=#{phoneNo},simNo=#{simNo},ip=#{ip},term_status=#{term_status},
+		create_man=#{create_man},create_date=#{create_date},is_valid=#{is_valid},term_asset_no=#{term_asset_no},term_manufacturer=#{term_manufacturer},
+		phase=#{phase},remarks=#{remarks},customer_id=#{customer_id},term_pro=#{term_pro},term_model=#{term_model}
+		where term_id=#{term_id}
+	</update>
+	<delete id="delTerminal">
+		delete from if_inf_term where term_id in
+		<foreach item="item" index="index" collection="delTerminalIdArray"
+			open="(" separator="," close=")">#{item}</foreach>
+	</delete>
+	<!-- <insert id="addTermBat" > insert into if_inf_term (term_addr,term_name,phoneNo,simNo,ip,term_status,create_man,create_date,is_valid,term_asset_no,term_manufacturer, 
+		phase,remarks,customer_id,term_pro,term_model) values <foreach item="item" 
+		index="index" collection="terms" separator="," >#{item} (#{item.term_addr},#{item.term_name},#{item.phoneNo},#{item.simNo},#{item.ip},#{item.term_status}, 
+		#{item.create_man},#{item.create_date},#{item.is_valid}, #{item.term_asset_no},#{item.term_manufacturer},#{item.phase},#{item.remarks},#{item.customer_id}, 
+		#{item.term_pro},#{item.term_model}) </foreach> </insert> -->
+
+	<select id="getCustomepList" resultType="com.nk.pojo.INF_CUSTOMER">
+		select * from
+		if_inf_customer
+	</select>
+
+	<sql id="search_meter">
+		<where>
+			<if test="mp_no!=null and mp_no!=''">
+				MP_NO like CONCAT("%",#{mp_no},"%")
+			</if>
+			<if test="mp_name!=null and mp_name !=''">
+				AND MP_NAME like CONCAT("%",#{mp_name},"%")
+			</if>
+			<if test="create_man!=null and create_man !=''">
+				AND CREATE_MAN like CONCAT("%",#{create_man},"%")
+			</if>
+			<if test="create_date!=null and create_date !=''">
+				AND DATE_FORMAT(CREATE_DATE,'%Y-%m-%d') = #{create_date}
+			</if>
+		</where>
+	</sql>
+	<select id="getMeterTotal" parameterType="MAP" resultType="int">
+		select count(*) from if_inf_mp 
+		<include refid="search_meter"></include>
+	</select>
+
+	<select id="getPageMeter" parameterType="MAP" resultType="com.nk.pojo.INF_MP">
+		select m.*,b.eName customer_name from if_inf_mp m JOIN tbl_biz_enterpriseinfo b 
+		ON m.customer_id = b.eid
+		<include refid="search_meter"></include>
+		<if test="sort != null and sort != ''">
+			order by #{sort} #{order}
+		</if>
+		limit #{start},#{end}
+	</select>
+	<select id="getMeterBympNo" resultType="com.nk.pojo.INF_MP">
+		select * from if_inf_mp where mp_no = #{mp_no}
+	</select>
+
+
+
+	<insert id="addMeter" parameterType="com.nk.pojo.INF_MP">
+		insert into
+		if_inf_mp(mp_no,comm_no,mp_name,mp_type,industry_type,mp_class,main_mp_id,ct,pt,ct_pt,create_man,create_date,mp_status,mp_asset_no,
+		amm_protocol_addr,amm_protocol,rated_voltage,rated_current,amm_class,amm_manufacturer,amm_type,mp_addr,phase,customer_id,term_id,transformer_id,
+		remarks,standard_factor_s,mp_p_e,dl_ti,equipment_no,sys_no,group_id,is_main_obj,check_demand,is_public,imgPath)
+		values(#{mp_no},#{comm_no},#{mp_name},#{mp_type},#{industry_type},#{mp_class},#{main_mp_id},#{ct},#{pt},#{ct_pt},#{create_man},#{create_date},#{mp_status},#{mp_asset_no},#{
+		amm_protocol_addr},#{amm_protocol},#{rated_voltage},#{rated_current},#{amm_class},#{amm_manufacturer},#{amm_type},#{mp_addr},#{phase},#{customer_id},#{term_id},#{transformer_id},#{
+		remarks},#{standard_factor_s},#{mp_p_e},#{dl_ti},#{equipment_no},#{sys_no},#{group_id},#{is_main_obj},#{check_demand},#{is_public},#{imgPath})<!-- #{mp_no},#{comm_no},#{mp_name},#{mp_type},#{industry_type},#{mp_class},#{main_mp_id},#{ct},#{pt},
+		#{ct_pt},#{create_man},#{create_date},#{mp_status},#{mp_asset_no},#{amm_protocol_addr},#{amm_protocol},#{rated_voltage},#{rated_current},#{amm_class},
+		#{amm_manufacturer},#{amm_type},#{mp_addr},#{phase},#{customer_id},#{term_id},#{transformer_id},#{remarks},#{standard_factor_s},#{mp_p_e},
+		#{dl_ti},#{equipment_no},#{sys_no},#{group_id},#{is_main_obj},#{check_demand},#{is_public},#{imgPath} -->
+	</insert>
+	<update id="updateMeter" parameterType="com.nk.pojo.INF_MP">
+		update if_inf_mp set
+		mp_id=#{amm_protocol_addr},mp_no=#{mp_no},comm_no=#{comm_no},mp_name=#{mp_name},mp_type=#{mp_type},industry_type=#{industry_type},mp_class=#{mp_class},
+		main_mp_id=#{main_mp_id},ct=#{ct},pt=#{pt},ct_pt=#{ct_pt},create_man=#{create_man},create_date=#{create_date},mp_status=#{mp_status},
+		mp_asset_no=#{mp_asset_no},amm_protocol_addr=#{amm_protocol_addr},amm_protocol=#{amm_protocol},rated_voltage=#{rated_voltage},
+		rated_current=#{rated_current},amm_class=#{amm_class},amm_manufacturer=#{amm_manufacturer},amm_type=#{amm_type},mp_addr=#{mp_addr},
+		phase=#{phase},customer_id=#{customer_id},term_id=#{term_id},transformer_id=#{transformer_id},remarks=#{remarks},standard_factor_s=#{standard_factor_s},
+		mp_p_e=#{mp_p_e},dl_ti=#{dl_ti},equipment_no=#{equipment_no},sys_no=#{sys_no},group_id=#{group_id},is_main_obj=#{is_main_obj},
+		check_demand=#{check_demand},is_public=#{is_public},imgPath=#{imgPath}
+		where mp_id=#{mp_id}
+	</update>
+	<delete id="delMeter">
+		delete from if_inf_mp where mp_id in
+		<foreach item="item" index="index" collection="delMeterIdArray"
+			open="(" separator="," close=")">#{item}</foreach>
+	</delete>
+
+	<sql id="search_didef">
+		<where>
+			<if test="name!=null and name != ''">
+				DI_GROUP_NAME like CONCAT("%",#{name},"%")
+			</if>
+		</where>
+	</sql>
+
+
+
+	<select id="getDiDefTotal" parameterType="map" resultType="int">
+		select count(*) from if_di_def
+		<include refid="search_didef"></include>
+	</select>
+	<select id="getPageDiDef" parameterType="map" resultType="com.nk.pojo.DI_DEF">
+		select * from if_di_def
+		<include refid="search_didef"></include>
+		<if test="sort != null and sort != ''">
+			order by #{sort} #{order}
+		</if>
+		limit #{start},#{end}
+	</select>
+	<insert id="addDiDef" parameterType="com.nk.pojo.DI_DEF">
+		insert into
+		if_di_def(di_item_no,di_no,di_name,di_group_name,di_item_name,di_item_format,di_item_length,use_unit)
+		values(#{di_item_no},#{di_no},#{di_name},#{di_group_name},#{di_item_name},#{di_item_format},#{di_item_length},#{use_unit})
+	</insert>
+	<update id="updateDiDef" parameterType="com.nk.pojo.DI_DEF">
+		update if_di_def set
+		di_no=#{di_no},di_name=#{di_name},di_group_name=#{di_group_name},di_item_name=#{di_item_name},
+		di_item_format=#{di_item_format},di_item_length=#{di_item_length},use_unit=#{use_unit}
+		where di_item_no=#{di_item_no}
+	</update>
+	<delete id="delDiDef">
+		delete from if_di_def where di_item_no in
+		<foreach item="item" index="index" collection="delDiDefIdArray"
+			open="(" separator="," close=")">#{item}</foreach>
+	</delete>
+	<sql id="search_task">
+		<where>
+			<if test="name!=null and name != ''">
+				task_template_NAME like CONCAT("%",#{name},"%")
+			</if>
+		</where>
+	</sql>
+	<select id="getTaskTemplateTotal" parameterType="map"
+		resultType="int">
+		select count(*) from if_task_template
+		<include refid="search_task"></include>
+	</select>
+	<select id="getPageTaskTemplate" parameterType="map"
+		resultType="com.nk.pojo.TASK_TEMPLATE">
+		select * from if_task_template
+		<include refid="search_task"></include>
+		<if test="sort != null and sort != ''">
+			order by #{sort} #{order}
+		</if>
+		limit #{start},#{end}
+	</select>
+	<insert id="addTaskTemplate" parameterType="com.nk.pojo.TASK_TEMPLATE">
+		insert into
+		if_task_template(task_template_name,di_items)
+		values(#{task_template_name},#{di_items})
+	</insert>
+	<update id="updateTaskTemplate" parameterType="com.nk.pojo.TASK_TEMPLATE">
+		update if_task_template set
+		task_template_name=#{task_template_name},di_items=#{di_items} where
+		task_template_id=#{task_template_id}
+	</update>
+	<delete id="delTaskTemplate">
+		delete from if_task_template where task_template_id in
+		<foreach item="item" index="index" collection="delTaskTemplateIdArray"
+			open="(" separator="," close=")">#{item}</foreach>
+	</delete>
+	<sql id="search_taskrecord">
+		<where>
+			<if test="connNo!=null and connNo != ''">
+				COMM_NO like CONCAT("%",#{connNo},"%")
+			</if>
+			<if test="jn!=null and jn != ''">
+				AND JN like CONCAT("%",#{jn},"%")
+			</if>
+		</where>
+	</sql>
+	<select id="getTaskRecordTotal" parameterType="map" resultType="int">
+		select count(*) from if_task_record
+		<include refid="search_taskrecord"></include>
+	</select>
+	<select id="getPageTaskRecord" parameterType="map"
+		resultType="com.nk.pojo.TASK_RECORD">
+		select * from if_task_record
+		<include refid="search_taskrecord"></include>
+		<if test="sort != null and sort != ''">
+			order by #{sort} #{order}
+		</if>
+		limit #{start},#{end}
+	</select>
+	<insert id="addTaskRecord" parameterType="com.nk.pojo.TASK_RECORD">
+		insert into
+		if_task_record(ddp_id,comm_no,jn,tt,ts,ts_unit,ti,rs,rs_unit,ri,task_template_id,exe_status)
+		values(#{ddp_id},#{comm_no},#{jn},#{tt},#{ts},#{ts_unit},#{ti},#{rs},#{rs_unit},#{ri},#{task_template_id},#{exe_status})
+	</insert>
+	<update id="updateTaskRecord" parameterType="com.nk.pojo.TASK_RECORD">
+		update if_task_record set
+		comm_no=#{comm_no},jn=#{jn},tt=#{tt},ts=#{ts},ts_unit=#{ts_unit},ti=#{ti},rs=#{rs},rs_unit=#{rs_unit},ri=#{ri},
+		task_template_id=#{task_template_id},exe_status=#{exe_status} where
+		ddp_id=#{ddp_id}
+	</update>
+	<delete id="delTaskRecord">
+		delete from if_task_record where ddp_id in
+		<foreach item="item" index="index" collection="delTaskRecordIdArray"
+			open="(" separator="," close=")">#{item}</foreach>
+	</delete>
+
+
+	<sql id="search_manufacturer">
+		<where>
+			<if test="manufacturer_no !=null and manufacturer_no != ''">
+				MANUFACTURER_NO like CONCAT("%",#{manufacturer_no},"%")
+			</if>
+			<if test="manufacturer_name!=null and manufacturer_name != ''">
+				AND MANUFACTURER_NAME like CONCAT("%",#{manufacturer_name},"%")
+			</if>
+			<if test="start_time!=null and start_time !=''">
+				AND DATE_FORMAT(START_TIME,'%Y-%m-%d') = #{start_time}
+			</if>
+		</where>
+	</sql>
+	<select id="getDeviceFactoryManagementTotal" parameterType="MAP"
+		resultType="int">
+		select count(*) from if_inf_manufacturer
+		<include refid="search_manufacturer"></include>
+	</select>
+	<select id="getDeviceFactoryManagement" parameterType="MAP"
+		resultType="com.nk.pojo.INF_MANUFACTURER">
+		select * from if_inf_manufacturer
+		<include refid="search_manufacturer"></include>
+		<if test="sort != null and sort != ''">
+			order by #{sort} #{order}
+		</if>
+		limit #{start},#{end}
+	</select>
+
+	<insert id="addManufacturer" parameterType="com.nk.pojo.INF_MANUFACTURER">
+		insert into
+		if_inf_manufacturer(MANUFACTURER_NO,MANUFACTURER_NAME,ADDRESS,START_TIME,MAN,PHONENO,TERMINAL_NUMBER)
+		values(#{manufacturer_no},#{manufacturer_name},#{address},#{start_time},#{man},#{phoneno},#{terminal_number})
+	</insert>
+	<update id="updateManufacturer" parameterType="com.nk.pojo.INF_MANUFACTURER">
+		update if_inf_manufacturer set
+		MANUFACTURER_NO=#{manufacturer_no},MANUFACTURER_NAME=#{manufacturer_name},ADDRESS=#{address},START_TIME=#{start_time},
+		MAN=#{man},PHONENO=#{phoneno},TERMINAL_NUMBER=#{terminal_number} where
+		manufacturer_id=#{manufacturer_id}
+	</update>
+	<delete id="delManufacturer">
+		delete from if_inf_manufacturer where manufacturer_id in
+		<foreach item="item" index="index" collection="delIdArrayInt"
+			open="(" separator="," close=")">#{item}</foreach>
+	</delete>
+	<sql id="search_onlinerate">
+		<where>
+			<if test="equipment_name!=null and equipment_name !=''">
+				EQUIPMENT_NAME LIKE CONCAT("%",#{equipment_name},"%")
+			</if>
+			<if test="terminal_ormeterid!=null and terminal_ormeterid !=''">
+				AND TERMINAL_ORMETERID LIKE CONCAT("%",#{terminal_ormeterid},"%")
+			</if>
+		</where>
+	</sql>
+
+	<select id="getDeviceOnlineRateManagementTotal" parameterType="MAP"
+		resultType="int">
+		select count(*) from if_inf_terminal_online_rate
+		<include refid="search_onlinerate"></include>
+
+	</select>
+	<select id="getDeviceOnlineRateManagement" parameterType="MAP"
+		resultType="com.nk.pojo.INF_TERMINAL_ONLINE_RATE">
+		select * from if_inf_terminal_online_rate
+		<include refid="search_onlinerate"></include>
+		<if test="sort != null and sort != ''">
+			order by #{sort} #{order}
+		</if>
+		limit #{start},#{end}
+	</select>
+	<insert id="addTerminaLonlineRate" parameterType="com.nk.pojo.INF_TERMINAL_ONLINE_RATE">
+		insert into
+		if_inf_terminal_online_rate(EQUIPMENT_NAME,TERMINAL_ORMETERID,ONLINE_TIME,OFFLINE_TIME,STATE,DEV_TYPE,ACTION_TYPE,TIME_TAG)
+		values(#{equipment_name},#{terminal_ormeterid},#{online_time},#{offline_time},#{state},#{dev_type},#{action_type},#{time_tag})
+	</insert>
+	<update id="updateTerminaLonlineRate" parameterType="com.nk.pojo.INF_TERMINAL_ONLINE_RATE">
+		update if_inf_terminal_online_rate set
+		EQUIPMENT_NAME=#{equipment_name},TERMINAL_ORMETERID=#{terminal_ormeterid},ONLINE_TIME=#{online_time},
+		OFFLINE_TIME=#{offline_time},
+		STATE=#{state},DEV_TYPE=#{dev_type},ACTION_TYPE=#{action_type},TIME_TAG=#{time_tag}
+		where ID=#{id}
+	</update>
+	<delete id="delTerminaLonlineRate">
+		delete from if_inf_terminal_online_rate where ID in
+		<foreach item="item" index="index" collection="delIdArrayInt"
+			open="(" separator="," close=")">#{item}</foreach>
+	</delete>
+
+	<!-- 前置机表 -->
+	<sql id="search_front">
+		<where>
+			<if test="front_code!=null and front_code !=''">
+				FRONT_CODE LIKE CONCAT("%",#{front_code},"%")
+			</if>
+			<if test="front_name!=null and front_name !=''">
+				AND FRONT_NAME LIKE CONCAT("%",#{front_name},"%")
+			</if>
+		</where>
+	</sql>
+	<select id="getFrontMachineTotal" resultType="int">
+		select count(*) from if_inf_front_machine
+		<include refid="search_front"></include>
+	</select>
+	<select id="getFrontMachine" resultType="com.nk.pojo.INF_FRONT_MACHINE">
+		select * from if_inf_front_machine
+		<include refid="search_front"></include>
+		<if test="sort != null and sort != ''">
+			order by #{sort} #{order}
+		</if>
+		limit #{start},#{end}
+	</select>
+	<select id="getFrontByCode" resultType="com.nk.pojo.INF_FRONT_MACHINE">
+		select * from if_inf_front_machine where front_code = #{front_code}
+	</select>
+	<insert id="addFrontMachine" parameterType="com.nk.pojo.INF_FRONT_MACHINE">
+		insert into
+		if_inf_front_machine(FRONT_CODE,FRONT_NAME,COMMON_LOG_IP,WEBSERVER_IP,WEBSERVER_PORT,LAST_DATE,STATE)
+		values(#{front_code},#{front_name},#{common_log_ip},#{webserver_ip},#{webserver_port},#{last_date},#{state})
+	</insert>
+	<update id="updateFrontMachine" parameterType="com.nk.pojo.INF_FRONT_MACHINE">
+		update if_inf_front_machine set
+		FRONT_CODE=#{front_code},FRONT_NAME=#{front_name},COMMON_LOG_IP=#{common_log_ip},
+		WEBSERVER_IP=#{webserver_ip},
+		WEBSERVER_PORT=#{webserver_port},LAST_DATE=#{last_date},STATE=#{state}
+		where FRONT_ID=#{front_id}
+	</update>
+	<delete id="deleteFrontMachine">
+		delete from if_inf_front_machine where FRONT_ID in
+		<foreach item="item" index="index" collection="delIdArrayInt"
+			open="(" separator="," close=")">#{item}</foreach>
+	</delete>
+
+	<!-- //////////////// -->
+	<sql id="search_terminal_account">
+		<where>
+			<if test="terminal_ormeterid!=null and terminal_ormeterid !=''">
+				TERMINAL_ORMETERID LIKE CONCAT("%",#{terminal_ormeterid},"%")
+			</if>
+			<if test="equipment_name!=null and equipment_name !=''">
+				AND EQUIPMENT_NAME LIKE CONCAT("%",#{equipment_name},"%")
+			</if>
+		</where>
+	</sql>
+	<select id="getTerminalAccountTotal" resultType="int">
+		select count(*) from if_inf_terminal_account
+		<include refid="search_terminal_account"></include>
+
+	</select>
+	<select id="getTerminalAccount" resultType="com.nk.pojo.INF_TERMINAL_ACCOUNT">
+		select * from if_inf_terminal_account
+		<include refid="search_terminal_account"></include>
+		<if test="sort != null and sort != ''">
+			order by #{sort} #{order}
+		</if>
+		limit #{start},#{end}
+	</select>
+	<insert id="addTerminalAccount" parameterType="com.nk.pojo.INF_TERMINAL_ACCOUNT">
+		insert into
+		if_inf_terminal_account(TERMINAL_ORMETERID,EQUIPMENT_NAME,RATED_VOLTAGE,RATED_CURRENT,RATED_POWER,MP_ID,URL,REMARKS,dev_type)
+		values(#{terminal_ormeterid},#{equipment_name},#{rated_voltage},#{rated_current},#{rated_power},#{mp_id},#{url},#{remarks},#{dev_type})
+	</insert>
+	<update id="updateTerminalAccount" parameterType="com.nk.pojo.INF_TERMINAL_ACCOUNT">
+		update if_inf_terminal_account set
+		EQUIPMENT_NAME=#{equipment_name},RATED_VOLTAGE=#{rated_voltage},RATED_CURRENT=#{rated_current},
+		RATED_POWER=#{rated_power},
+		MP_ID=#{mp_id},URL=#{url},REMARKS=#{remarks} where
+		TERMINAL_ORMETERID=#{terminal_ormeterid}
+	</update>
+	<delete id="deleteTerminalAccount">
+		delete from if_inf_terminal_account where TERMINAL_ORMETERID in
+		<foreach item="item" index="index" collection="delIdArrayInt"
+			open="(" separator="," close=")">#{item}</foreach>
+	</delete>
+
+	<!-- /////////////////////////////////// -->
+	<sql id="search_transformer">
+		<where>
+			<if test="transformer_no!=null and transformer_no != ''">
+				TRANSFORMER_NO like CONCAT("%",#{transformer_no},"%")
+			</if>
+			<if test="transformer_name!=null and transformer_name !=''">
+				AND TRANSFORMER_NAME like CONCAT("%",#{transformer_name},"%")
+			</if>
+			<if test="create_date !=null and create_date !=''">
+				AND DATE_FORMAT(CREATED_DATE, '%Y-%m-%d') = #{create_date}
+			</if>
+		</where>
+	</sql>
+	<select id="getTransformerTotal" resultType="int">
+		select count(*) from if_inf_transformer
+		<include refid="search_transformer"></include>
+	</select>
+	<select id="getTransformer" resultType="com.nk.pojo.INF_TRANSFORMER">
+		select * from if_inf_transformer
+		<include refid="search_transformer"></include>
+		<if test="sort != null and sort != ''">
+			order by #{sort} #{order}
+		</if>
+		limit #{start},#{end}
+	</select>
+	<insert id="addTransformer" parameterType="com.nk.pojo.INF_TRANSFORMER">
+		insert into
+		if_inf_transformer(
+		TRANSFORMER_ID,TRANSFORMER_NO,TRANSFORMER_NAME,CUSTOMER_ID,
+		TRANSFORMER_MODEL,TRANSFORMER_CAPACITY,RATED_VOLTAGE,RATED_CURRENT,
+		RATED_FREQUENCY,NOLOAD_CURRENT,NOLOAD_LOSS,LOAD_LOSS,
+		SHORT_CI,SERIAL_NUM,MAX_VOL,MIN_VOL,
+		TRANSFORMER_STATUS,IS_VALID,CREATE_MAN,CREATED_DATE,
+		TRANSFORMER_ASSET_NO,TRANSFORMER_MANUFACTURER,REMARKS,TERM_MANUFACTURER)
+		VALUES(
+		#{transformer_id},#{transformer_no},#{transformer_name},#{customer_id},
+		#{transformer_model},#{transformer_capacity},#{rated_voltage},#{rated_current},
+		#{rated_frequency},#{noload_current},#{noload_loss},#{load_loss},
+		#{short_ci},#{serial_num},#{max_vol},#{min_vol},
+		#{transformer_status},#{is_valid},#{create_man},#{created_date},
+		#{transformer_asset_no},#{transformer_manufacturer},#{remarks},#{term_manufacturer})
+	</insert>
+	<update id="updateTransformer" parameterType="com.nk.pojo.INF_TRANSFORMER">
+		update if_inf_transformer set
+		TRANSFORMER_ID=#{transformer_id},TRANSFORMER_NO=#{transformer_no},TRANSFORMER_NAME=#{transformer_name},CUSTOMER_ID=#{customer_id},
+		TRANSFORMER_MODEL=#{transformer_model},TRANSFORMER_CAPACITY=#{transformer_capacity},RATED_VOLTAGE=#{rated_voltage},RATED_CURRENT=#{rated_current},
+		RATED_FREQUENCY=#{rated_frequency},NOLOAD_CURRENT=#{noload_current},NOLOAD_LOSS=#{noload_loss},LOAD_LOSS=#{load_loss},
+		SHORT_CI=#{short_ci},SERIAL_NUM=#{serial_num},MAX_VOL=#{max_vol},MIN_VOL=#{min_vol},
+		TRANSFORMER_STATUS=#{transformer_status},IS_VALID=#{is_valid},CREATE_MAN=#{create_man},CREATED_DATE=#{created_date},
+		TRANSFORMER_ASSET_NO=#{transformer_asset_no},TRANSFORMER_MANUFACTURER=#{transformer_manufacturer},REMARKS=#{remarks},TERM_MANUFACTURER=#{term_manufacturer}
+		where TRANSFORMER_ID=#{transformer_id}
+	</update>
+	<delete id="deleteTransformer">
+		delete from if_inf_transformer where TRANSFORMER_ID in
+		<foreach item="item" index="index" collection="delIdArrayInt"
+			open="(" separator="," close=")">#{item}</foreach>
+	</delete>
+
+
+	<!-- 设备安装投运消退管理 -->
+	<sql id="search_RunD">
+		<where>
+			<if test="equipment_name!=null and equipment_name!='' ">
+				equipment_name like CONCAT("%",#{equipment_name},"%")
+			</if>
+		</where>
+	</sql>
+
+
+	<select id="getTerminalInstallRunDropManagementTotal"
+		resultType="int">
+		SELECT COUNT(*) FROM if_inf_terminal_management
+		<include refid="search_RunD"></include>
+	</select>
+	<select id="getTerminalInstallRunDropManagement" resultType="com.nk.pojo.INF_TERMINAL_MANAGEMENT">
+		select * from if_inf_terminal_management
+		<include refid="search_RunD"></include>
+		<if test="sort != null and sort != ''">
+			order by #{sort} #{order}
+		</if>
+		limit #{start},#{end}
+	</select>
+	<insert id="addTerminalInstallRunDropManagement" parameterType="com.nk.pojo.INF_TERMINAL_MANAGEMENT">
+		INSERT if_inf_terminal_management(
+		TERMINAL_ORMETERID,EQUIPMENT_NAME,TERMINAL_ASSET_NO,TERMINAL_MODEL,TERMINAL_MANUFACTURER,
+		INSTALL_DATE, INSTALL_MAN,INSTALL_ADD,OPERATION_DATE,OPERATION_MAN,
+		OPERATION_EXPLAIN,OPERATION_TIME,FADE_DATE,FADE_MAN,FADE_REASON,TERMINAL_STATE)
+		VALUES(
+		#{terminal_ormeterid},#{equipment_name},#{terminal_asset_no},#{terminal_model},
+		#{terminal_manufacturer},#{install_date},#{install_man},#{install_add}
+		,#{operation_date},#{operation_man},#{operation_explain},#{operation_time},
+		#{fade_date},#{fade_man},#{fade_reason},#{terminal_state})
+
+	</insert>
+
+	<update id="updateTerminalInstallRunDropManagement" parameterType="com.nk.pojo.INF_TERMINAL_MANAGEMENT">
+    	update if_inf_terminal_management set 
+    	EQUIPMENT_NAME=#{equipment_name},TERMINAL_ASSET_NO=#{terminal_asset_no},TERMINAL_MODEL=#{terminal_model},
+    	TERMINAL_MANUFACTURER=#{terminal_manufacturer},install_date=#{install_date},install_man=#{install_man},install_add=#{install_add},
+    	operation_date=#{operation_date},operation_man=#{operation_man},operation_explain=#{operation_explain},operation_time=#{operation_time},
+    	fade_date=#{fade_date},fade_man=#{fade_man},fade_reason=#{fade_reason},terminal_state=#{terminal_state}
+    	WHERE TERMINAL_ORMETERID=#{terminal_ormeterid}
+    </update>
+    <delete id="deleteTerminalInstallRunDropManagement">
+    	delete from if_inf_terminal_management where terminal_ormeterid in
+    	 <foreach item="item" index="index" collection="delIdArray" open="(" separator="," close=")">
+    	 #{item}</foreach>
+    </delete>
+    
+    <!-- 维保预警记录管理表 -->
+	<sql id="search_d"> 
+		<where>
+			<if test="equipment_name!=null and equipment_name!=''">
+				equipment_name LIKE CONCAT("%",#{equipment_name},"%")
+			</if>
+		</where>
+	</sql>
+	<select id="getDeviceRepairPreWarnManagementTotal" resultType="int">
+		SELECT COUNT(*) FROM if_inf_alarm_record
+		<include refid="search_d"></include>
+	</select>
+	<select id="getDeviceRepairPreWarnManagement" resultType="com.nk.pojo.INF_ALARM_RECORD">
+		select t.*,e.ename as customer_name from if_inf_alarm_record t left join tbl_biz_enterpriseinfo e on t.customer_id=e.eid
+		<include refid="search_d"></include> 
+		<if test="sort != null and sort != ''">
+       		order by #{sort} #{order}
+		</if>
+        	limit #{start},#{end}
+	</select>
+	<insert id="addDeviceRepairPreWarnManagement" parameterType="com.nk.pojo.INF_ALARM_RECORD">
+		INSERT INTO
+		if_inf_alarm_record(ID,TERMINAL_ORMETERID,EQUIPMENT_NAME,CUSTOMER_ID,RECORD_TIME,
+		ALARM_CODE,ALARM_NAME,ALARM_WAY,ALARM_STATE)
+		VALUES(#{id},#{terminal_ormeterid},
+		#{equipment_name},#{customer_id},#{record_time},
+		#{alarm_code},#{alarm_name},#{alarm_way},#{alarm_state})
+	</insert>
+	<update id="updateDeviceRepairPreWarnManagement" parameterType="com.nk.pojo.INF_ALARM_RECORD">
+		update if_inf_alarm_record set
+		TERMINAL_ORMETERID=#{terminal_ormeterid},EQUIPMENT_NAME=#{equipment_name},CUSTOMER_ID=#{customer_id},
+		RECORD_TIME=#{record_time},
+		ALARM_CODE=#{alarm_code},ALARM_NAME=#{alarm_name},ALARM_WAY=#{alarm_way},ALARM_STATE=#{alarm_state}
+		WHERE ID = #{id}
+	</update>
+	<delete id="deleteDeviceRepairPreWarnManagement">
+		delete from if_inf_alarm_record where ID in
+		<foreach item="item" index="index" collection="delIdArray"
+			open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	<!-- 设备维保记录 -->
+	<sql id="search_drm">
+		<where>
+			<if test="equipment_name!=null and equipment_name!=''">
+				equipment_name LIKE CONCAT("%",#{equipment_name},"%")
+			</if>
+		</where>
+	</sql>
+	<select id="getDeviceRepairManagementTotal" resultType="int">
+		SELECT COUNT(*) FROM if_inf_maintain
+		<include refid="search_drm"></include>
+	</select>
+	<select id="getDeviceRepairManagement" resultType="com.nk.pojo.IF_INF_MAINTAIN">
+		select * from if_inf_maintain
+		<include refid="search_drm"></include>
+		<if test="sort != null and sort != ''">
+			order by #{sort} #{order}
+		</if>
+		limit #{start},#{end}
+	</select>
+	<insert id="addDeviceRepairManagement" parameterType="com.nk.pojo.IF_INF_MAINTAIN">
+		INSERT INTO
+		if_inf_maintain(terminal_ormeterid,equipment_name,maintain_date,maintain_man,
+		maintain_record,next_maintain_date,next_maintain_man,maintain_content)
+		VALUES(#{terminal_ormeterid},#{equipment_name},#{maintain_date},#{maintain_man},
+		#{maintain_record},#{next_maintain_date},#{next_maintain_man},#{maintain_content})
+	</insert>
+	<update id="updateDeviceRepairManagement" parameterType="com.nk.pojo.IF_INF_MAINTAIN">
+		update if_inf_maintain set
+		equipment_name
+		=#{equipment_name},maintain_date=#{maintain_date},maintain_man=#{maintain_man},
+		maintain_record=#{maintain_record},next_maintain_date=#{next_maintain_date},
+		next_maintain_man=#{next_maintain_man},maintain_content=#{maintain_content}
+		WHERE terminal_ormeterid = #{terminal_ormeterid}
+	</update>
+	<delete id="deleteDeviceRepairManagement">
+		delete from if_inf_maintain where terminal_ormeterid in
+		<foreach item="item" index="index" collection="delIdArray"
+			open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	<!-- 设备在线率相关SQL -->
+	<select id="getFrontMachineByonline" resultType="com.nk.pojo.INF_FRONT_MACHINE">
+		select * from if_inf_front_machine where front_id in (
+		select front_id from if_inf_front_online )
+	</select>
+	<select id="getFrontOnlineOnlineRateByDates" resultType="com.nk.pojo.INF_TERMINAL_ONLINE_RATE">
+		SELECT * FROM if_inf_terminal_online
+		<where>
+			<if test="begin!=null and begin!=''">
+				happen_time &gt;= #{begin}
+			</if>
+			<if test="end!=null and end!=''">
+				and happen_time &lt;= #{end}
+			</if>
+			AND DEV_TYPE = 1
+			ORDER BY HAPPEN_TIME
+		</where>
+	</select>
+	<select id="getTerminalOnlineRateByDates" resultType="com.nk.pojo.INF_TERMINAL_ONLINE_RATE">
+		SELECT * FROM if_inf_terminal_online
+		<where>
+			<if test="begin!=null and begin!=''">
+				happen_time &gt;= #{begin}
+			</if>
+			<if test="end!=null and end!=''">
+				and happen_time &lt;= #{end}
+			</if>
+			AND DEV_TYPE > 1
+			ORDER BY HAPPEN_TIME
+		</where>
+	</select>
+	<select id="getOnlineByBt" resultType="com.nk.pojo.INF_TERMINAL_ONLINE_RATE">
+		SELECT * FROM if_inf_terminal_online
+		<choose>
+			<when test="type == 1">
+				WHERE happen_time &lt; #{begin} AND DEV_TYPE = 1 ORDER BY HAPPEN_TIME
+				DESC
+			</when>
+			<otherwise>
+				WHERE happen_time &lt; #{begin} AND DEV_TYPE > 1 ORDER BY HAPPEN_TIME
+				DESC
+			</otherwise>
+		</choose>
+	</select>
+	<!-- /////xin///// -->
+	<select id="getTerminalAccounts" resultType="com.nk.pojo.INF_TERMINAL_ACCOUNT">
+		select TERMINAL_ORMETERID,EQUIPMENT_NAME,dev_type FROM
+		if_inf_terminal_account WHERE dev_type not in(1)
+	</select>
+	<select id="getFrontMachineByterminal_ormeterid" resultType="com.nk.pojo.INF_FRONT_MACHINE">
+		SELECT * FROM if_inf_front_machine
+		WHERE
+		FRONT_ID = (
+		select FRONT_ID FROM if_inf_front_online WHERE TERMINAL_ORMETERID =
+		#{terminal_ormeterid}
+		)
+	</select>
+	<select id="getTerminalOnlineRateByTERMINAL_ORMETERID"
+		resultType="com.nk.pojo.INF_TERMINAL_ONLINE_RATE">
+		SELECT * FROM if_inf_terminal_online WHERE
+		TERMINAL_ORMETERID = #{id}
+		AND DEV_TYPE not in (1)
+		ORDER BY HAPPEN_TIME
+	</select>
+	<select id="getTerminalOnlineRateByDate" resultType="com.nk.pojo.INF_TERMINAL_ONLINE_RATE">
+		SELECT * FROM if_inf_terminal_online WHERE
+		TERMINAL_ORMETERID = #{id}
+		AND HAPPEN_TIME > #{date}
+		AND DEV_TYPE = 1
+		AND ACTION_TYPE = 2
+		ORDER BY HAPPEN_TIME
+	</select>
+	<select id="getFrontOnlineOnlineRateByTERMINAL_ORMETERID"
+		resultType="com.nk.pojo.INF_TERMINAL_ONLINE_RATE">
+		SELECT * FROM if_inf_terminal_online WHERE
+		TERMINAL_ORMETERID = #{id}
+		AND DEV_TYPE = 1
+		ORDER BY HAPPEN_TIME
+	</select>
+	<!-- 设备在线带时间搜索 -->
+	<!-- <select id="getFrontOnlineOnlineRateByDates" resultType="com.nk.pojo.INF_TERMINAL_ONLINE_RATE"> 
+		SELECT * FROM if_inf_terminal_online <where> <if test="begin!=null and begin!=''"> 
+		happen_time &gt;= #{begin} </if> <if test="end!=null and end!=''"> and happen_time 
+		&lt;= #{end} </if> AND DEV_TYPE = 1 ORDER BY HAPPEN_TIME </where> </select> -->
+	<!-- <select id="getTerminalOnlineRateByDates" resultType="com.nk.pojo.INF_TERMINAL_ONLINE_RATE"> 
+		SELECT * FROM if_inf_terminal_online <where> <if test="begin!=null and begin!=''"> 
+		happen_time &gt;= #{begin} </if> <if test="end!=null and end!=''"> and happen_time 
+		&lt;= #{end} </if> AND TERMINAL_ORMETERID = #{id} AND DEV_TYPE > 1 ORDER 
+		BY HAPPEN_TIME </where> </select> -->
+	<!-- 厂家排行 -->
+	<!-- <select id="getManufacturerByTypeAndId" resultType="com.nk.pojo.INF_MANUFACTURER"> 
+		select * FROM if_inf_manufacturer <choose> <when test="type == 2"> WHERE 
+		manufacturer_name = (select DISTINCT term_manufacturer FROM if_inf_term where 
+		term_id =#{id}) </when> <when test="type == 3"> WHERE manufacturer_name = 
+		(select DISTINCT amm_manufacturer FROM if_inf_mp WHERE mp_id =#{id} ) </when> 
+		<when test="type == 4"> WHERE manufacturer_name = (select DISTINCT TRANSFORMER_MANUFACTURER 
+		FROM if_inf_transformer WHERE transformer_id =#{id}) </when> <otherwise> 
+		</otherwise> </choose> </select> -->
+
+	<!-- <select id="getTermBymanufacturer" resultType="com.nk.pojo.INF_TERM"> 
+		select * from if_inf_term where term_manufacturer = #{manufacturer_name} 
+		</select> -->
+	<!-- <select id="getFrontAndTermBytermId" resultType="com.nk.pojo.FrontAndTerm"> 
+		select * from if_inf_front_online where terminal_ormeterid in <foreach item="item" 
+		index="index" collection="ids" open="(" separator="," close=")"> #{item} 
+		</foreach> </select> -->
+	<select id="getAllManufacturer" resultType="com.nk.pojo.INF_MANUFACTURER">
+		select * FROM if_inf_manufacturer
+	</select>
+	<select id="getTremsOnlineRateByDate" resultType="com.nk.pojo.INF_TERMINAL_ONLINE_RATE">
+		SELECT * FROM if_inf_terminal_online
+		<where>
+			<if test="begin!=null and begin!=''">
+				happen_time &gt;= #{begin}
+			</if>
+			<if test="end!=null and end!=''">
+				and happen_time &lt;= #{end}
+			</if>
+			and TERMINAL_ORMETERID IN
+			<foreach item="item" index="index" collection="ids" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</where>
+		AND dev_type > 1
+		ORDER BY HAPPEN_TIME
+	</select>
+	<select id="getFrontOnlineRateByDate" resultType="com.nk.pojo.INF_TERMINAL_ONLINE_RATE">
+		SELECT * FROM if_inf_terminal_online
+		<where>
+			<if test="begin!=null and begin!=''">
+				happen_time &gt;= #{begin}
+			</if>
+			<if test="end!=null and end!=''">
+				and happen_time &lt;= #{end}
+			</if>
+			and TERMINAL_ORMETERID IN
+			<foreach item="item" index="index" collection="ids" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</where>
+		AND dev_type = 1
+		ORDER BY HAPPEN_TIME
+	</select>
+	<select id="getAllTermByManufacturer" resultType="com.nk.pojo.INF_TERM">
+		select * from if_inf_term where term_manufacturer in (
+		SELECT
+		manufacturer_name FROM if_inf_manufacturer)
+	</select>
+	<select id="getAllFrontAndTerm" resultType="com.nk.pojo.FrontAndTerm">
+		select * from if_inf_front_online where terminal_ormeterid in
+		<foreach item="item" index="index" collection="ids" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+	<select id="queryEnterpriseinfoTotal" resultType="int">
+		select count(*) from tbl_biz_enterpriseinfo
+		<where>
+			<if test="exist"> ename like CONCAT("%",#{param},"%") order by	convert(ename using gbk)</if>
+		</where>
+	</select>
+	<select id="queryEnterpriseinfo" resultType="map">
+		select eid id,ename text from tbl_biz_enterpriseinfo
+		<where>
+			<if test="exist"> ename like CONCAT("%",#{param},"%") order by	convert(ename using gbk)</if>
+		</where>
+		<if test="limit"> LIMIT ${page},10</if>
+	</select>
+	<select id="queryTermTotal" resultType="int">
+		select count(*) from if_inf_term
+		<where>
+			<if test="exist"> is_valid = 1  AND term_name like CONCAT("%",#{param},"%")</if>
+		</where>
+	</select>
+	<select id="queryTermInfo" resultType="map">
+		SELECT term_id id,term_name text FROM if_inf_term
+		<where>
+			<if test="exist"> is_valid = 1  AND term_name like CONCAT("%",#{param},"%") order by convert(term_name using gbk)
+			</if>
+		</where>
+		<if test="limit"> LIMIT ${page},10</if>
+	</select>
+	<select id="queryTransformerTotal" resultType="int">
+		select count(*) from if_inf_transformer
+		<where>
+			<if test="exist"> is_valid = 1 AND transformer_name like CONCAT("%",#{param},"%")</if>
+		</where>
+	</select>
+	<select id="queryTransformerInfo" resultType="map">
+		SELECT transformer_id id,transformer_name text FROM if_inf_transformer
+		<where>
+			<if test="exist"> is_valid = 1 AND transformer_name like CONCAT("%",#{param},"%") order by convert(transformer_name using gbk)</if>
+		</where>
+		<if test="limit"> LIMIT ${page},10</if>
+	</select>
+	
+	<select id="queryTerminalAccountIsExist" resultType="int">
+		SELECT count(*) FROM if_inf_terminal_account WHERE  terminal_ormeterid=#{id} AND equipment_name=#{name}
+	</select>
+	<select id="queryTransformerIsExist" resultType="int">
+		SELECT count(*) FROM if_inf_transformer WHERE  transformer_id=#{id} 
+	</select>
+
+    <select id="getAllTerminalDevCustomer" resultType="com.nk.pojo.MeasureDevCustomer">
+    	select t.term_id as measureDevId,t.customer_id as customerId,e.ename as customerName from if_inf_term t left join tbl_biz_enterpriseinfo e on t.customer_id=e.eid
+    </select>
+    <select id="getAllMeterDevCustomer" resultType="com.nk.pojo.MeasureDevCustomer">
+    	select t.mp_id as measureDevId,t.customer_id as customerId,e.ename as customerName from if_inf_mp t left join tbl_biz_enterpriseinfo e on t.customer_id=e.eid
+    </select>
+    
+    <select id="queryMeterIsExist" resultType="int">
+    	SELECT COUNT(*) FROM IF_INF_MP WHERE mp_no = #{data} OR amm_protocol_addr = #{data}
+    </select>
+    
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+

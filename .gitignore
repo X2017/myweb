@@ -1,0 +1,8 @@
+/node_modules
+/bower_components
+/.idea
+/.git
+/.tern-project
+/.project
+/.classpath
+/.svn
